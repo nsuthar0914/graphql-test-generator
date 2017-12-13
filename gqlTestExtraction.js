@@ -23,6 +23,8 @@ function writeFile(filename, query, queryName, schemaLocation, importLocation) {
 function gqlTestExtraction({ entry, output, schemaLocation, overwriteFiles, importLocation }) {
 	tmp.dir({ unsafeCleanup: true}, (err, graphqlOutput, cleanup) => {
 		fs.readdir(entry, (err, files) => {
+			console.log("files")
+			console.log(files, graphqlOutput)
 			errorExit(err);
 			let finishedCount = 0;
 			files.forEach(file => {
@@ -31,12 +33,24 @@ function gqlTestExtraction({ entry, output, schemaLocation, overwriteFiles, impo
 					if (stat.isFile() && file.includes(".js")) {
 						fs.readFile(path.join(entry, file), "utf8", (err, data) => {
 							errorExit(err);
+							console.log("data")
+							console.log(data)
 							const { queriesWritten } = gqlExtract({
 								source: data,
 								filePath: graphqlOutput
 							});
+							if (!queriesWritten.size) {
+								const queries = require(path.join(entry, file)).default;
+								Object.keys(queries).forEach(key => {
+								    queriesWritten.set(key, queries[key].loc.source.body);
+								});
+							}
+							console.log("queriesWritten")
+							// console.log(queriesWritten);
 							if (queriesWritten.size) {
 								queriesWritten.forEach((query, queryName) => {
+										console.log("query, queryName");
+										console.log(query, queryName);
 										errorExit(err);
 										mkdir(output, err => {
 											errorExit(err);
