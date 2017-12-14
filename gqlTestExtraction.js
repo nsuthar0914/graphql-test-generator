@@ -36,9 +36,11 @@ function gqlTestExtraction({ entry, output, schemaLocation, overwriteFiles, impo
 								filePath: graphqlOutput
 							});
 							if (!queriesWritten.size) {
-								const queries = require(path.join(entry, file)).default;
+								const queries = require(path.join(entry, file));
 								Object.keys(queries).forEach(key => {
-								    queriesWritten.set(key, queries[key].loc.source.body);
+									if (typeof queries[key] === "string") {
+										queriesWritten.set(key, queries[key]);
+									}
 								});
 							}
 							if (queriesWritten.size) {
